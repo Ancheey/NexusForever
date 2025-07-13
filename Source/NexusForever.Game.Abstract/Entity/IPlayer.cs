@@ -89,7 +89,7 @@ namespace NexusForever.Game.Abstract.Entity
         ILogoutManager LogoutManager { get; }
         IAppearanceManager AppearanceManager { get; }
         IResurrectionManager ResurrectionManager { get; }
-
+        ITradeskillManager TradeskillManager { get; }
         IVendorInfo SelectedVendorInfo { get; set; }
 
         /// <summary>

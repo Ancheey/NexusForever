@@ -633,11 +633,15 @@ namespace NexusForever.GameTable
 
         [GameData]
         public GameTable<TradeskillMaterialEntry> TradeskillMaterial { get; private set; }
-
+        [GameData]
         public GameTable<TradeskillMaterialCategoryEntry> TradeskillMaterialCategory { get; private set; }
+        [GameData]
         public GameTable<TradeskillProficiencyEntry> TradeskillProficiency { get; private set; }
+        [GameData]
         public GameTable<TradeskillSchematic2Entry> TradeskillSchematic2 { get; private set; }
+        [GameData]
         public GameTable<TradeskillTalentTierEntry> TradeskillTalentTier { get; private set; }
+        [GameData]
         public GameTable<TradeskillTierEntry> TradeskillTier { get; private set; }
         public GameTable<TutorialEntry> Tutorial { get; private set; }
         public GameTable<TutorialAnchorEntry> TutorialAnchor { get; private set; }

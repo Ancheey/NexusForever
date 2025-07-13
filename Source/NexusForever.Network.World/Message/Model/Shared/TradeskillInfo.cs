@@ -3,7 +3,7 @@ using NexusForever.Game.Static.Crafting;
 
 namespace NexusForever.Network.World.Message.Model.Shared
 {
-    public class TradeskillInfo : IWritable
+    public class TradeskillInfo : IWritable 
     {
         public TradeskillType TradeskillId { get; set; }
         public uint TradeskillXp { get; set; }

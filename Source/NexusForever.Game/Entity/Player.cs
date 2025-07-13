@@ -233,6 +233,8 @@ namespace NexusForever.Game.Entity
 
         public IVendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
+        public ITradeskillManager TradeskillManager { get; private set; }
+
         private UpdateTimer saveTimer = new(SaveDuration);
         private PlayerSaveMask saveMask;
 
@@ -333,6 +335,7 @@ namespace NexusForever.Game.Entity
 
             AppearanceManager       = new AppearanceManager(this, model);
             ResurrectionManager     = new ResurrectionManager(this);
+            TradeskillManager       = new TradeskillManager(this, model);
 
             // do dependant stat balance after all stats and properties have been set
             SetDependantStatBalance(true);
@@ -715,6 +718,7 @@ namespace NexusForever.Game.Entity
             AchievementManager.SendInitialPackets(null);
             Account.RewardPropertyManager.SendInitialPackets();
             ResurrectionManager.SendInitialPackets();
+            TradeskillManager.SendInitialPackets();
 
             Session.EnqueueMessageEncrypted(new ServerPlayerInnate
             {
