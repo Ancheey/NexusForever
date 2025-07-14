@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Crafting;
+using NexusForever.Network.World.Message.Model.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,44 +14,34 @@ namespace NexusForever.Game.Entity
         public TradeskillType Type { get; }
         
 
-        public uint TradeskillXp => tradeskillXp;
+        public uint TradeskillXp { get; set; }
 
-        public uint PropertyProficiencyFlags { get; }
+        public uint PropertyProficiencyFlags { get; set; }
 
-        public uint TalentPoints => talentPoints;
+        public uint TalentPoints { get; set; }
 
-        public uint[] TradeskillTalentTierIds { get; }
+        public uint[] TradeskillTalentTierIds { get; set; }
 
-        public bool IsActive()
+        public bool IsActive { get; set; }
+
+        public TradeskillInfo GetInfo()
         {
-            return Type switch
+            return new TradeskillInfo()
             {
-                TradeskillType.Cooking => false,
-                TradeskillType.Farmer => false,
-                TradeskillType.Fishing => false,
-                TradeskillType.Runecrafting => false,
-                _ => true
+                IsActive = (uint)(IsActive ? 1 : 0),
+                TradeskillId = Type,
+                PropertyProficiencyFlags = PropertyProficiencyFlags,
+                TalentPoints = TalentPoints,
+                TradeskillTalentTierIds = TradeskillTalentTierIds,
+                TradeskillXp = TradeskillXp
             };
         }
+
         public Tradeskill(TradeskillType type)
         {
             Type = type;
             TradeskillTalentTierIds = new uint[10];
-            //PropertyProficiencyFlags = 0;
-            if (type == TradeskillType.Cooking)
-            {
-                TradeskillTalentTierIds[0] = 40;
-                TradeskillTalentTierIds[1] = 41;
-                TradeskillTalentTierIds[2] = 42;
-                TradeskillTalentTierIds[3] = 43;
-                TradeskillTalentTierIds[4] = 44;
-                TradeskillTalentTierIds[5] = 45;
-                TradeskillTalentTierIds[6] = 46;
-                TradeskillTalentTierIds[7] = 47;
-                PropertyProficiencyFlags = 40;
-            }
+            IsActive = false;
         }
-        private uint tradeskillXp = 0;
-        private uint talentPoints = 1;
     }
 }

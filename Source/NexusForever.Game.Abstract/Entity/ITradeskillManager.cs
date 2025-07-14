@@ -12,46 +12,40 @@ namespace NexusForever.Game.Abstract.Entity
 {
     public interface ITradeskillManager : IDatabaseCharacter
     {
-        uint MaxProfessions { get; set; }
-        ITradeskill Cooking { get; }
-        ITradeskill Farmer { get; }
-        ITradeskill Runecrafting { get; }
-        ITradeskill Fishing { get; }
-
         /// <summary>
         /// Returns whether it can learn tradeskill of a specific type
         /// </summary>
         /// <param name="type">Tradeskill type</param>
         /// <returns>whether it can learn tradeskill of a specific type</returns>
-        public bool CanLearnTradeskill(TradeskillType type);
-        /// <summary>
-        /// Attempts to unlearn a tradeskill at a specific index
-        /// </summary>
-        /// <param name="index">index of the tradeskill</param>
-        /// <returns>whether the action was successfull</returns>
-        public bool UnlearnTradeskill(uint index);
+        public bool CanActivateTradeskill(TradeskillType type);
         /// <summary>
         /// Attempts to unlearn a tradeskill of a certain type
         /// </summary>
         /// <param name="type">type of the tradeskill to unlearn</param>
         /// <returns>whether a tradeskill was unlearned</returns>
-        public bool UnlearnTradeskill(TradeskillType type);
+        public bool DeactivateTradeskill(TradeskillType type);
         /// <summary>
-        /// Learns a tradeskill of a certain type
+        /// Learns a tradeskill of a certain type. A check if the player can learn the tradeskill should be made before learning
         /// </summary>
         /// <param name="type">type of the tradeskill to learn</param>
-        public void LearnTradeskill(TradeskillType type);
-        /// <summary>
-        /// Injects a full tradeskill into the tradeskills
-        /// </summary>
-        /// <param name="tradeskill"></param>
-        public void LearnTradeskill(ITradeskill tradeskill);
+        public void ActivateTradeskill(TradeskillType type);
         /// <summary>
         /// Returns a list of learned active tradeskills
         /// </summary>
         /// <returns></returns>
-        public ImmutableList<ITradeskill> GetActiveTradeskills();
-        public ServerProfessionsLoad BuildLoadMessage();
+        public IEnumerable<ITradeskill> GetActiveTradeskills();
+        /// <summary>
+        /// Sends a packet to the user client informing it of a change in the tradeskill data
+        /// </summary>
+        /// <param name="type">type of the tradeskill to update</param>
+        public void UpdatePlayerTradeskill(TradeskillType type);
+        /// <summary>
+        /// Sends initial packets (ServerProfessionsLoad) to the client. Invoked when a character is being built on login.
+        /// </summary>
         public void SendInitialPackets();
+        /// <summary>
+        /// Checks whether a certain tradeskill is currently active
+        /// </summary>
+        public bool IsTradeskillActive(TradeskillType type);
     }
 }

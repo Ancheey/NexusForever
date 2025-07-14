@@ -5,181 +5,125 @@ using NexusForever.Game.Static.Crafting;
 using NexusForever.GameTable;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NexusForever.Game.Entity
 {
     public class TradeskillManager : ITradeskillManager
     {
-        private uint maxProfessions;
+        private readonly int maxActiveTradeskills = 2;
+        private readonly Dictionary<TradeskillType, ITradeskill> tradeskills;
+        private readonly List<TradeskillType> activeTradeskills;
         private IPlayer player;
-        private List<ITradeskill> activeTradeskills { get; }
 
-        public ITradeskill Cooking { get;}
-        public ITradeskill Farmer { get; }
-        public ITradeskill Runecrafting { get; }
-        public ITradeskill Fishing { get; }
-        public uint MaxProfessions 
-        { 
-            get => maxProfessions; 
-            set 
-            { 
-                maxProfessions = value;
-            }
-        }
-
-        
-
-        public bool CanLearnTradeskill(TradeskillType type)
+        /// <summary>
+        /// Checks whether a tradeskill of certain type can be activated
+        /// </summary>
+        public bool CanActivateTradeskill(TradeskillType type)
         {
-            switch (type)
-            {
-                case TradeskillType.Cooking:
-                    return false;
-                case TradeskillType.Farmer:
-                    return false;
-                case TradeskillType.Runecrafting:
-                    return false;
-                default:
-                    break;
-            }
-            if (activeTradeskills.Count >= MaxProfessions)
-                return false;
-            foreach(var tradeskill in activeTradeskills)
-            {
-                if (tradeskill.Type == type)
-                    return false;
-            }
+            if (activeTradeskills.Count >= maxActiveTradeskills)
+                return false; //already has all active slots filled
+
+            if (tradeskills[type].IsActive)
+                return false; //already active
+
             return true;
         }
-
+        /// <summary>
+        /// Saves the Trdeskill data to the database
+        /// </summary>
+        /// <param name="context"></param>
         public void Save(CharacterContext context)
         {
-            //todo
+            //tODO: make this work
         }
-
-        public bool UnlearnTradeskill(uint index)
+        /// <summary>
+        /// Deactivates a tradeskill of a certain type
+        /// </summary>
+        /// <returns>Whether the action was successful</returns>
+        public bool DeactivateTradeskill(TradeskillType type)
         {
-            //todo
+            if (activeTradeskills.Remove(type))
+            {
+                tradeskills[type].IsActive = false;
+                UpdatePlayerTradeskill(type);
+                return true;
+            }
             return false;
         }
-
-        public bool UnlearnTradeskill(TradeskillType type)
+        /// <summary>
+        /// Activates a tradeskill of a certain type. A check whether it can be done before activating is advised.
+        /// </summary>
+        public void ActivateTradeskill(TradeskillType type)
         {
-            //todo
-            return true;
+            tradeskills[type].IsActive = true;
+            activeTradeskills.Add(type);
+            UpdatePlayerTradeskill(type);
         }
-
-        public void LearnTradeskill(TradeskillType type)
+        /// <summary>
+        /// Returns a list of currently active tradeskills.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ITradeskill> GetActiveTradeskills()
         {
-            var tradeskill = new Tradeskill(type);
-            LearnTradeskill(tradeskill);
+            foreach(var activeTradeskill in activeTradeskills)
+            {
+                yield return tradeskills[activeTradeskill];
+            }
         }
-
-        public void LearnTradeskill(ITradeskill tradeskill)
-        {
-            activeTradeskills.Add(tradeskill);
-        }
-
-        public ImmutableList<ITradeskill> GetActiveTradeskills()
-        {
-            return activeTradeskills.ToImmutableList();
-        }
-
-        public ServerProfessionsLoad BuildLoadMessage()
+        /// <summary>
+        /// Sends a set of initial data to the player. Invoked at character login.
+        /// </summary>
+        public void SendInitialPackets()
         {
             var message = new ServerProfessionsLoad()
             {
-                RelearnCooldown = 300
+                RelearnCooldown = 0
             };
-
-            var tradeskills = new List<TradeskillInfo>();
-            foreach(var tradeskill in activeTradeskills)
+            foreach (var tradeskill in tradeskills)
             {
-                var info = new TradeskillInfo()
-                {
-                    IsActive = 1,
-                    TradeskillId = tradeskill.Type,
-                    PropertyProficiencyFlags = tradeskill.PropertyProficiencyFlags,
-                    TalentPoints = tradeskill.TalentPoints,
-                    TradeskillXp = tradeskill.TradeskillXp,
-                    TradeskillTalentTierIds = tradeskill.TradeskillTalentTierIds
-                };
-                tradeskills.Add(info);
+                message.Tradeskills.Add(tradeskill.Value.GetInfo());
             }
-            foreach(TradeskillType t in (TradeskillType[])Enum.GetValues(typeof(TradeskillType)))
-            {
-                var info = new TradeskillInfo()
-                {
-                    IsActive = 0,
-                    TradeskillId = t,
-                    PropertyProficiencyFlags = 0,
-                    TalentPoints = 0,
-                    TradeskillXp = 0
-                };
-                if (t == TradeskillType.Cooking || t == TradeskillType.Weaponsmith)
-                    info.IsActive = 1;
-                tradeskills.Add(info);
-            }
-            foreach (var tradeskill in (new ITradeskill[] { Cooking /*Others*/}))
-            {
-                var info = new TradeskillInfo()
-                {
-                    IsActive = 1,
-                    TradeskillId = tradeskill.Type,
-                    PropertyProficiencyFlags = 0,
-                    TalentPoints = 0,
-                    TradeskillXp = 0,
-                    TradeskillTalentTierIds = [65]
-                };
-                tradeskills.Add(info);
-            }
-            
-            message.LearnedSchematics = [148,149,151];//test
-            message.DiscoveredSchematics.Add(new ServerProfessionsLoad.DiscoveredSchematic()
-            {
-                TradeskillSchematic2Id = 148,
-                Coordinates = new System.Numerics.Vector2(0,0)
-            });
-            message.DiscoveredSchematics.Add(new ServerProfessionsLoad.DiscoveredSchematic()
-            {
-                TradeskillSchematic2Id = 149,
-                Coordinates = new System.Numerics.Vector2(0, 0)
-            });
-            message.DiscoveredSchematics.Add(new ServerProfessionsLoad.DiscoveredSchematic()
-            {
-                TradeskillSchematic2Id = 150,
-                Coordinates = new System.Numerics.Vector2(0, 0)
-            });
-            //message.UnknownArray = [3303];//test
+            //TODO: load schematics etc things
 
-            //TODO: Handle schematics and discoveries. Handle hobbies
-
-            message.Tradeskills = tradeskills;
-
-            return message;
+            player.Session.EnqueueMessageEncrypted(message);
         }
-        public void SendInitialPackets()
+        /// <summary>
+        /// Updates client data on a certain tradeskill
+        /// </summary>
+        public void UpdatePlayerTradeskill(TradeskillType type)
         {
-            //var msg = BuildLoadMessage();
-            //player.Session.EnqueueMessage(msg);
+            var message = new ServerProfessionUpdate()
+            {
+                Tradeskill = tradeskills[type].GetInfo()
+            };
+            player.Session.EnqueueMessageEncrypted(message);
+        }
+        /// <summary>
+        /// Checks whether a certain tradeskill is currently active
+        /// </summary>
+        public bool IsTradeskillActive(TradeskillType type)
+        {
+            return tradeskills[type].IsActive;
         }
 
         public TradeskillManager(IPlayer player, CharacterModel model)
         {
-            this.player = player;
-            activeTradeskills = new List<ITradeskill>(2);
+            TradeskillType[] possibleTradeskills = Enum.GetValues<TradeskillType>();
 
-            //PH - load from the db
-            Cooking = new Tradeskill(TradeskillType.Cooking);
-            Farmer = new Tradeskill(TradeskillType.Farmer);
-            Runecrafting = new Tradeskill(TradeskillType.Runecrafting);
-            Fishing = new Tradeskill(TradeskillType.Fishing);
+
+            this.player = player;
+            tradeskills = new Dictionary<TradeskillType, ITradeskill>(possibleTradeskills.Length);
+            activeTradeskills = new List<TradeskillType>(maxActiveTradeskills);
+
+            foreach (var tradeskillType in possibleTradeskills)
+            {
+                tradeskills.Add(tradeskillType, new Tradeskill(tradeskillType));
+                //TODO: PH - load from the db
+            }
+
+            //Always true
+            tradeskills[TradeskillType.Cooking].IsActive = true;
         }
     }
 }

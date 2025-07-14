@@ -11,10 +11,11 @@ namespace NexusForever.Game.Abstract.Entity
     public interface ITradeskill
     {
         public TradeskillType Type { get; }
-        public uint TradeskillXp { get; }
-        public uint PropertyProficiencyFlags { get; }
-        public uint TalentPoints { get;}
+        public uint TradeskillXp { get; set; }
+        public uint PropertyProficiencyFlags { get; set; }
+        public uint TalentPoints { get; set; }
         public uint[] TradeskillTalentTierIds { get; }
-        public bool IsActive();
+        public bool IsActive { get; set; }
+        public TradeskillInfo GetInfo();
     }
 }
