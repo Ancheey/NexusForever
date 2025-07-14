@@ -5,7 +5,6 @@ using NexusForever.Game.Static.Crafting;
 using NexusForever.GameTable;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
-using System.Collections.Immutable;
 
 namespace NexusForever.Game.Entity
 {
@@ -14,6 +13,7 @@ namespace NexusForever.Game.Entity
         private readonly int maxActiveTradeskills = 2;
         private readonly Dictionary<TradeskillType, ITradeskill> tradeskills;
         private readonly List<TradeskillType> activeTradeskills;
+        private DateTime relearnCooldownFinishTimestamp;
         private IPlayer player;
 
         /// <summary>
@@ -107,6 +107,16 @@ namespace NexusForever.Game.Entity
             return tradeskills[type].IsActive;
         }
 
+        public void ResetRelearnTimer(TradeskillType unlearnedTradeskill)
+        {
+            relearnCooldownFinishTimestamp = DateTime.UtcNow; //do actual calculations based on exp. Find a way to get the data from the gametables
+        }
+
+        public int GetRemainingRelearnCooldown()
+        {
+            return (int)Math.Max(0, (relearnCooldownFinishTimestamp - DateTime.UtcNow).TotalMilliseconds);
+        }
+
         public TradeskillManager(IPlayer player, CharacterModel model)
         {
             TradeskillType[] possibleTradeskills = Enum.GetValues<TradeskillType>();
@@ -121,6 +131,8 @@ namespace NexusForever.Game.Entity
                 tradeskills.Add(tradeskillType, new Tradeskill(tradeskillType));
                 //TODO: PH - load from the db
             }
+
+            relearnCooldownFinishTimestamp = DateTime.UtcNow; //load from db
 
             //Always true
             tradeskills[TradeskillType.Cooking].IsActive = true;

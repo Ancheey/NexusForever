@@ -47,5 +47,14 @@ namespace NexusForever.Game.Abstract.Entity
         /// Checks whether a certain tradeskill is currently active
         /// </summary>
         public bool IsTradeskillActive(TradeskillType type);
+        /// <summary>
+        /// Resets the relearn timer to the maximum value based on the progress in the unlearned tradeskill.
+        /// </summary>
+        public void ResetRelearnTimer(TradeskillType unlearnedTradeskill);
+        /// <summary>
+        /// Returns how long the cooldown is going to be in ms
+        /// </summary>
+        /// <returns></returns>
+        public int GetRemainingRelearnCooldown();
     }
 }

@@ -58,7 +58,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                 case 40:
                 case 41: // "ResourceConversionOpen"
                 case 42: // "ToggleAbilitiesWindow"
-                case 43: // "InvokeTradeskillTrainerWindow"
+                case 43:
+                    HandleTradeskillTrainer(session);
+                    break;
                 case 45: // "InvokeShuttlePrompt"
                 case 46:
                 case 47:
@@ -100,6 +102,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             ServerVendorItemsUpdated vendorItemsUpdated = vendorEntity.VendorInfo.Build();
             vendorItemsUpdated.Guid = vendorEntity.Guid;
             session.EnqueueMessageEncrypted(vendorItemsUpdated);
+        }
+        private void HandleTradeskillTrainer(IWorldSession session)
+        {
+            var message = new ServerTradeskillRelearnCooldown {
+            RelearnCooldown = (uint)(session.Player.TradeskillManager.GetRemainingRelearnCooldown())
+            };
+            session.EnqueueMessageEncrypted(message);
         }
     }
 }
