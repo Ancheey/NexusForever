@@ -6,7 +6,8 @@
     /// </remarks>
     /// <remarks>
     /// IDs to reuse:
-    /// 38
+    /// -none-
+    /// First free ID: 127
     /// </remarks>
     public enum Permission
     {
@@ -34,6 +35,7 @@
         Achievement                 = 15,
         AchievementGrant            = 16,
         AchievementUpdate           = 17,
+        AchievementLookup           = 38,
 
         // broadcast
         Broadcast                   = 18,
@@ -137,6 +139,7 @@
         QuestObjective              = 80,
         QuestKill                   = 81,
         QuestList                   = 110,
+        QuestLookup                 = 126,
 
         // spell
         Spell                       = 83,

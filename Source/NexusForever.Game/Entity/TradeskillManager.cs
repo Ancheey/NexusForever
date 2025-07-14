@@ -59,6 +59,7 @@ namespace NexusForever.Game.Entity
             tradeskills[type].IsActive = true;
             activeTradeskills.Add(type);
             UpdatePlayerTradeskill(type);
+            player.QuestManager.ObjectiveUpdate(Static.Quest.QuestObjectiveType.LearnTradeskill, (uint)type, 1);
         }
         /// <summary>
         /// Returns a list of currently active tradeskills.
@@ -136,6 +137,9 @@ namespace NexusForever.Game.Entity
 
             //Always true
             tradeskills[TradeskillType.Cooking].IsActive = true;
+
+            //debug
+            tradeskills[TradeskillType.Cooking].PropertyProficiencyFlags = 35;
         }
     }
 }

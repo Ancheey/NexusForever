@@ -1,11 +1,18 @@
 ﻿using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Achievement;
+using NexusForever.Game.Social;
 using NexusForever.Game.Static.Achievement;
 using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Social;
+using NexusForever.Game.Text.Search;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -41,6 +48,38 @@ namespace NexusForever.WorldServer.Command.Handler
             }
 
             context.GetTargetOrInvoker<IPlayer>().AchievementManager.GrantAchievement(achievementId);
+        }
+        [Command(Permission.AchievementLookup, "Lookup an achievement by partial name.", "lookup")]
+        public void HandleAcheivementLookup(ICommandContext context,
+            [Parameter("Achievement name to lookup.")]
+            string name,
+            [Parameter("Maximum amount of results to return.")]
+            int? maxResults)
+        {
+            List<AchievementEntry> searchResults = SearchManager.Instance
+                .Search<AchievementEntry>(name, context.Language, e => e.LocalizedTextIdTitle, true)
+                .Take(maxResults ?? 25)
+                .ToList();
+
+            if (searchResults.Count == 0)
+            {
+                context.SendMessage($"Achievement lookup results was 0 entries for '{name}'.");
+                return;
+            }
+
+            context.SendMessage($"Achievement lookup results for '{name}' ({searchResults.Count}):");
+
+            var target = context.GetTargetOrInvoker<IPlayer>();
+            foreach (AchievementEntry itemEntry in searchResults)
+            {
+                var builder = new ChatMessageBuilder
+                {
+                    Type = ChatChannelType.System,
+                    Text = $"({itemEntry.Id}) "
+                };
+                builder.AppendText(GameTableManager.Instance.TextEnglish.GetEntry(itemEntry.LocalizedTextIdTitle));
+                target.Session.EnqueueMessageEncrypted(builder.Build());
+            }
         }
     }
 }

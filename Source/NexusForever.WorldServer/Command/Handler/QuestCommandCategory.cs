@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Text;
-using NexusForever.Game;
+﻿using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Quest;
@@ -8,9 +6,14 @@ using NexusForever.Game.Social;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Social;
+using NexusForever.Game.Text.Search;
+using NexusForever.GameTable.Model;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -117,6 +120,38 @@ namespace NexusForever.WorldServer.Command.Handler
             }
 
             context.SendMessage($"Success! You've killed {quantity} of Creature ID: {creatureId}");
+        }
+        [Command(Permission.QuestLookup, "Lookup a quest by partial name.", "lookup")]
+        public void HandleQuestLookup(ICommandContext context,
+            [Parameter("Quest name to lookup.")]
+            string name,
+            [Parameter("Maximum amount of results to return.")]
+            int? maxResults)
+        {
+            List<Quest2Entry> searchResults = SearchManager.Instance
+                .Search<Quest2Entry>(name, context.Language, e => e.LocalizedTextIdTitle, true)
+                .Take(maxResults ?? 25)
+                .ToList();
+
+            if (searchResults.Count == 0)
+            {
+                context.SendMessage($"Quest lookup results was 0 entries for '{name}'.");
+                return;
+            }
+
+            context.SendMessage($"Quest lookup results for '{name}' ({searchResults.Count}):");
+
+            var target = context.GetTargetOrInvoker<IPlayer>();
+            foreach (Quest2Entry itemEntry in searchResults)
+            {
+                var builder = new ChatMessageBuilder
+                {
+                    Type = ChatChannelType.System,
+                    Text = $"({itemEntry.Id}) "
+                };
+                builder.AppendQuest((ushort)itemEntry.Id);
+                target.Session.EnqueueMessageEncrypted(builder.Build());
+            }
         }
     }
 }
