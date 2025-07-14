@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Static.Crafting;
+using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,14 @@ namespace NexusForever.Game.Abstract.Entity
         public uint TalentPoints { get; set; }
         public uint[] TradeskillTalentTierIds { get; }
         public bool IsActive { get; set; }
+        /// <summary>
+        /// Builds info used for update messages
+        /// </summary>
+        /// <returns>Built message</returns>
         public TradeskillInfo GetInfo();
+        /// <summary>
+        /// Get tiers of the tradeskill based on its type. (should probably be changed later)
+        /// </summary>
+        
     }
 }

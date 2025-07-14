@@ -1,5 +1,6 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Static.Crafting;
+using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using System;
 using System.Collections.Generic;
@@ -56,5 +57,25 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <returns></returns>
         public int GetRemainingRelearnCooldown();
+        /// <summary>
+        /// Retrieves a specified tier of a tradeskill
+        /// </summary>
+        /// <param name="type">type of the tradeskill</param>
+        /// <param name="tier">tier of the tradeskill</param>
+        /// <returns></returns>
+        public TradeskillTierEntry GetTradeskillTier(TradeskillType type, uint tier);
+        /// <summary>
+        /// Retrieves all tiers of a tradeskill
+        /// </summary>
+        /// <param name="type">tradeskill type</param>
+        public List<TradeskillTierEntry> GetTradeskillTiers(TradeskillType type);
+        /// <summary>
+        /// Retrieves the amount of tradeskill tiers
+        /// </summary>
+        /// <param name="type">type of the tradeskill</param>
+        public int GetTradeskillTierCount(TradeskillType type);
+
+
+
     }
 }

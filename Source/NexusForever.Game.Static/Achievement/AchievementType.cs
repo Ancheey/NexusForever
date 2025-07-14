@@ -6,8 +6,8 @@
         KillCreatureEntry = 1,
         KillCreatureGroup = 2,
         QuestComplete     = 3,
+        TradeskillLearn   = 37,
         MapComplete       = 53,
-        TradeskillLearn   = 65,
         ItemConsume       = 80
     }
 }

@@ -3,6 +3,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Crafting;
 using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 
@@ -10,6 +11,7 @@ namespace NexusForever.Game.Entity
 {
     public class TradeskillManager : ITradeskillManager
     {
+        private Dictionary<TradeskillType, List<TradeskillTierEntry>> tradeskillTiers;
         private readonly int maxActiveTradeskills = 2;
         private readonly Dictionary<TradeskillType, ITradeskill> tradeskills;
         private readonly List<TradeskillType> activeTradeskills;
@@ -59,7 +61,13 @@ namespace NexusForever.Game.Entity
             tradeskills[type].IsActive = true;
             activeTradeskills.Add(type);
             UpdatePlayerTradeskill(type);
+
+            //Quest handler
             player.QuestManager.ObjectiveUpdate(Static.Quest.QuestObjectiveType.LearnTradeskill, (uint)type, 1);
+
+            //Achievement / tech tree handler
+            var tradeskillFirstTierId = GetTradeskillTier(type, 1).Id;
+            player.AchievementManager.CheckAchievements(player, Static.Achievement.AchievementType.TradeskillLearn, tradeskillFirstTierId);
         }
         /// <summary>
         /// Returns a list of currently active tradeskills.
@@ -118,25 +126,63 @@ namespace NexusForever.Game.Entity
             return (int)Math.Max(0, (relearnCooldownFinishTimestamp - DateTime.UtcNow).TotalMilliseconds);
         }
 
+        public TradeskillTierEntry GetTradeskillTier(TradeskillType type, uint tier)
+        {
+            foreach(var tierEntry in tradeskillTiers[type])
+            {
+                if(tierEntry.Tier == tier)
+                    return tierEntry;
+            }
+            throw new ArgumentOutOfRangeException($"Supplied tier ({tier}) was out of bounds for {type} with only {GetTradeskillTierCount(type)} tiers available");
+        }
+
+        public List<TradeskillTierEntry> GetTradeskillTiers(TradeskillType type)
+        {
+            return tradeskillTiers[type];
+        }
+
+        public int GetTradeskillTierCount(TradeskillType type)
+        {
+            return tradeskillTiers[type].Count;
+        }
+
         public TradeskillManager(IPlayer player, CharacterModel model)
         {
+            this.player = player;
+
+            //Enum of all tradeskills (might want to remove fishing)
             TradeskillType[] possibleTradeskills = Enum.GetValues<TradeskillType>();
 
-
-            this.player = player;
+            //list of tradeskills data
             tradeskills = new Dictionary<TradeskillType, ITradeskill>(possibleTradeskills.Length);
+            //list of active tradeskills
             activeTradeskills = new List<TradeskillType>(maxActiveTradeskills);
+
+            tradeskillTiers = new Dictionary<TradeskillType, List<TradeskillTierEntry>>(possibleTradeskills.Length);
 
             foreach (var tradeskillType in possibleTradeskills)
             {
                 tradeskills.Add(tradeskillType, new Tradeskill(tradeskillType));
-                //TODO: PH - load from the db
+                tradeskillTiers.Add(tradeskillType, []);
+                //TODO: PH - load tradeskill stats from the db
             }
 
+            //TODO: load active tradeskills from the db
+
+            //We're doing this to make access to tiers for achievements/tech tree easier
+            var tradeskillTierEntries = GameTableManager.Instance.TradeskillTier.Entries;
+            foreach(var tier in tradeskillTierEntries)
+            {
+                tradeskillTiers[(TradeskillType)tier.TradeSkillId].Add(tier);
+            }
+
+            //relearn
             relearnCooldownFinishTimestamp = DateTime.UtcNow; //load from db
 
             //Always true
             tradeskills[TradeskillType.Cooking].IsActive = true;
+
+
 
             //debug
             tradeskills[TradeskillType.Cooking].PropertyProficiencyFlags = 35;
