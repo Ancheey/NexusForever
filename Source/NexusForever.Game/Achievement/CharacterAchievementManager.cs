@@ -3,6 +3,9 @@ using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Static.Achievement;
+using NexusForever.Game.Static.Crafting;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Achievement
 {
@@ -53,6 +56,10 @@ namespace NexusForever.Game.Achievement
             if (achievement.Info.Entry.CharacterTitleId != 0u)
                 owner.TitleManager.AddTitle((ushort)achievement.Info.Entry.CharacterTitleId);
 
+            //Tradeskills
+            GrantTradeskillRewards(achievement);
+            
+
             // TODO
             /*if (isRealmFirst)
             {
@@ -62,6 +69,33 @@ namespace NexusForever.Game.Achievement
                     Player        = owner.Name
                 });
             }*/
+        }
+        private void GrantTradeskillRewards(IAchievement achievement)
+        {
+            if (achievement.Info.Entry.AchievementGroupId == 0)
+                return; //Very likely not a tradeskill achievement because it is not in any UI
+
+            //find category parent
+            var categoryParent = GameTableManager.Instance.AchievementCategory.GetEntry(achievement.Info.Entry.AchievementCategoryId).AchievementCategoryIdParent;
+
+            //find tradeskill parenting the category id
+            var tradeskillInfo = GameTableManager.Instance.Tradeskill.Entries
+                .FirstOrDefault(t => t.AchievementCategoryId == categoryParent, null);
+
+            if (tradeskillInfo == null)
+                return;//Does not belong to the tradeskill category
+
+            TradeskillAchievementRewardEntry rewardEntry = GameTableManager.Instance.TradeskillAchievementReward.Entries
+                .FirstOrDefault(t => t.AchievementId == achievement.Id, null);
+
+            if (rewardEntry == null)
+                return; //no reward asociated
+                        
+            TradeskillType type = (TradeskillType)tradeskillInfo.Id;
+
+            //Now that we have a tradeskill type and the reward entry we can give the user his rewards.
+            owner.TradeskillManager.GrantTalentPoints(type, rewardEntry.TalentPoints);
+
         }
     }
 }

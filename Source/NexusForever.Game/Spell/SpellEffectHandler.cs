@@ -239,6 +239,14 @@ namespace NexusForever.Game.Spell
         {
         }
 
+        [SpellEffectHandler(SpellEffectType.GiveSchematic)]
+        public static void HandleEffectGiveSchematic(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            if (target is not IPlayer player)
+                return;
+            player.TradeskillManager.LearnSchematic(info.Entry.DataBits00);
+        }
+
         [SpellEffectHandler(SpellEffectType.UnitPropertyModifier)]
         public static void HandleEffectPropertyModifier(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {

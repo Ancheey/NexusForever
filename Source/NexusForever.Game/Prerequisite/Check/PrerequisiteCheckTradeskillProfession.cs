@@ -31,7 +31,9 @@ namespace NexusForever.Game.Prerequisite.Check
             switch(comparison)
             {
                 case PrerequisiteComparison.GreaterThan:
-                    return player.TradeskillManager.IsTradeskillActive((TradeskillType)objectId);
+                    return 
+                        player.TradeskillManager.IsTradeskillActive((TradeskillType)objectId)                   //we check if the tradeskill is active
+                        && player.TradeskillManager.GetTradeskillTier((TradeskillType)objectId).Tier > value;   //And whether the tier is high enough
                 default:
                     {
                         log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.TradeSkillProfession}!");

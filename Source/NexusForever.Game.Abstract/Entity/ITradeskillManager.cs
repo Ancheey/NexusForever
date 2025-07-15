@@ -65,6 +65,10 @@ namespace NexusForever.Game.Abstract.Entity
         /// <returns></returns>
         public TradeskillTierEntry GetTradeskillTier(TradeskillType type, uint tier);
         /// <summary>
+        /// Returns current tradeskill tier (has more or equal experience than required exp for the tier)
+        /// </summary>
+        public TradeskillTierEntry GetTradeskillTier(TradeskillType type);
+        /// <summary>
         /// Retrieves all tiers of a tradeskill
         /// </summary>
         /// <param name="type">tradeskill type</param>
@@ -74,8 +78,39 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <param name="type">type of the tradeskill</param>
         public int GetTradeskillTierCount(TradeskillType type);
-
-
+        /// <summary>
+        /// Grants a specific amount of experience to a tradeskill.
+        /// Use GrantTradeskillCraftXp if granting experience for a craft.
+        /// </summary>
+        /// <param name="type">type of tradeskill</param>
+        /// <param name="exp">experience to grant</param>
+        public void GrantTradeskillXp(TradeskillType type, uint exp);
+        /// <summary>
+        /// Grants experience based on the schematic tradeskill, tier and whether it was failed or not.
+        /// </summary>
+        public void GrantTradeskillCraftXp(ulong schematic2Id, bool craftSuccessful);
+        /// <summary>
+        /// Learns the schematic
+        /// </summary>
+        /// <param name="schematic2Id"></param>
+        public void LearnSchematic(uint schematic2Id);
+        /// <summary>
+        /// Grants the player tradeskill talent point
+        /// </summary>
+        public void GrantTalentPoints(TradeskillType type, uint amount = 1);
+        /// <summary>
+        /// Grant the player a tradeskill talent by its bonus ID and the talent tier
+        /// </summary>
+        /// <param name="type">Tradeskill type</param>
+        /// <param name="bonusId">TradeskillBonusId</param>
+        /// <param name="tier">Tier of the talent</param>
+        public void GrantTradeskillTalent(TradeskillType type, uint bonusId, uint tier);
+        /// <summary>
+        /// Reset tradeskill talents
+        /// </summary>
+        public void ResetTradeskillTalents(TradeskillType type);
+        public uint GetTalentResetCost(TradeskillType type);
+       
 
     }
 }

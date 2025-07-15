@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NexusForever.WorldServer.Network.Message.Handler.Tradeskill
+namespace NexusForever.WorldServer.Network.Message.Handler.Crafting
 {
     public class ClientCraftingCraftItemWithCatalystHandler : IMessageHandler<IWorldSession, ClientCraftingCraftItemWithCatalyst>
     {

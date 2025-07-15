@@ -22,9 +22,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <returns>Built message</returns>
         public TradeskillInfo GetInfo();
-        /// <summary>
-        /// Get tiers of the tradeskill based on its type. (should probably be changed later)
-        /// </summary>
+        public uint GetHighestTalentTier();
         
     }
 }

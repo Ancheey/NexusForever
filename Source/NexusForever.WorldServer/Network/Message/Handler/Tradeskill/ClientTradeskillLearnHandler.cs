@@ -19,7 +19,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Tradeskill
                 session.Player.TradeskillManager.DeactivateTradeskill(packet.ToDropTradeskillId);
 
             if (packet.ToLearnTradeskillId != 0 && session.Player.TradeskillManager.CanActivateTradeskill(packet.ToLearnTradeskillId))
+            {
                 session.Player.TradeskillManager.ActivateTradeskill(packet.ToLearnTradeskillId);
+                //session.Player.TradeskillManager.GrantTradeskillXp(packet.ToLearnTradeskillId, 600);
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Quest;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Achievement;
+using NexusForever.Game.Static.Crafting;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
@@ -604,6 +605,9 @@ namespace NexusForever.Game.Entity
                     break;
                 case QuestRewardType.Money:
                     player.CurrencyManager.CurrencyAddAmount((CurrencyType)entry.ObjectId, entry.ObjectAmount);
+                    break;
+                case QuestRewardType.TradeSkillXp:
+                    player.TradeskillManager.GrantTradeskillXp((TradeskillType)entry.ObjectId, entry.ObjectAmount);
                     break;
                 default:
                 {

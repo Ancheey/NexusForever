@@ -78,6 +78,11 @@ namespace NexusForever.WorldServer.Command.Handler
                     Text = $"({itemEntry.Id}) "
                 };
                 builder.AppendText(GameTableManager.Instance.TextEnglish.GetEntry(itemEntry.LocalizedTextIdTitle));
+                if (itemEntry.AchievementGroupId != 0u)
+                {
+                    builder.AppendText($" [{itemEntry.AchievementGroupId}]");
+                    builder.AppendText($" - {GameTableManager.Instance.AchievementGroup.GetEntry(itemEntry.AchievementGroupId).TradeSkillId}");
+                }
                 target.Session.EnqueueMessageEncrypted(builder.Build());
             }
         }

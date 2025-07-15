@@ -41,5 +41,14 @@ namespace NexusForever.Game.Entity
             TradeskillTalentTierIds = new uint[10];
             IsActive = false;
         }
+        public uint GetHighestTalentTier()
+        {
+            for(uint i = 9; i >=0; i--)
+            {
+                if (TradeskillTalentTierIds[i] != 0)
+                    return i;
+            }
+            return 0u;
+        }
     }
 }
