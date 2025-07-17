@@ -23,6 +23,8 @@ namespace NexusForever.Game.Abstract.Entity
         /// <returns>Built message</returns>
         public TradeskillInfo GetInfo();
         public uint GetHighestTalentTier();
+        //public void 
+        //attach modifiers (bonuses to the tradeskill)
         
     }
 }

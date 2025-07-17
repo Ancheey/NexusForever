@@ -10,6 +10,7 @@
         UnbuffedFailCap             = 0x8,//additive
         ChargeIncrement_RightShift  = 0x9,//additive
         OutputCount                 = 0xA,//multiplier
+        //Ingredient return chance  = 0xB,
         AdditiveCost                = 0xE,//multiplier
         AdditiveVector              = 0xF,//multiplier
         AdditiveRadius              = 0x10,//multiplier

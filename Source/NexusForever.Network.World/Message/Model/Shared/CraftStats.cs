@@ -16,7 +16,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
             for (int i = 0; i < StatType.Length; i++)
             {
-                StatType[i] = (Property)(temp & 0xFF);
+                StatType[i] = (Property)((temp - 1) & 0xFF); //for some reason it has to be temp - 1. Otherwise the stat is offset 1 too far.
                 temp >>= 8;
             }
 
