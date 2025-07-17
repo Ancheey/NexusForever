@@ -135,7 +135,7 @@ namespace NexusForever.Game.Entity
                     // TODO: the data value is the RandomStatGroupId, choose a random stat?
                     case ItemStatType.RandomStatGroup:
                         break;
-                    case ItemStatType.Unknown4:
+                    case ItemStatType.Crafted:
                     {
                         // this one is weird...
                         // there is additional code if offset 0x60 in item template is set but from what I can see this is never set
