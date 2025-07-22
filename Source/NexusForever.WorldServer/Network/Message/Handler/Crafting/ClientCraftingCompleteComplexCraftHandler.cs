@@ -1,9 +1,12 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Spell;
+using NexusForever.Game.Static.Entity;
+using NexusForever.GameTable;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -39,6 +42,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Crafting
                 arr += $" {i} ";
             }
             session.Player.SendSystemMessage($"Unk Array : {arr}]");
+            var schematic = GameTableManager.Instance.TradeskillSchematic2.GetEntry(packet.TradeskillSchematic2Id);
+
+            //send a spell packet
+            //store craft in the tradeskillmanager
+            //make spell effect to finish craft
+
+            session.Player.CastSpell(47372,1, new SpellParameters // 47372 - Crafting Spell - MBC - Tier 1
+            {
+                UserInitiatedSpellCast = true,
+            });
 
         }
     }

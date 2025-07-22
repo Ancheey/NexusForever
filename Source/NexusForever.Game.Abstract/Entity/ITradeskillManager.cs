@@ -1,4 +1,5 @@
 ﻿using NexusForever.Database.Character;
+using NexusForever.Game.Abstract.Crafting;
 using NexusForever.Game.Static.Crafting;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
@@ -84,11 +85,13 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <param name="type">type of tradeskill</param>
         /// <param name="exp">experience to grant</param>
-        public void GrantTradeskillXp(TradeskillType type, uint exp);
+        /// <returns>Amount of experience granted. Can differ from <paramref name="exp"/>!</returns>
+        public uint GrantTradeskillXp(TradeskillType type, uint exp);
         /// <summary>
         /// Grants experience based on the schematic tradeskill, tier and whether it was failed or not.
         /// </summary>
-        public void GrantTradeskillCraftXp(ulong schematic2Id, bool craftSuccessful);
+        /// <returns>Amount of experience granted</returns>
+        public uint GrantTradeskillCraftXp(ulong schematic2Id, bool craftSuccessful);
         /// <summary>
         /// Learns the schematic
         /// </summary>
@@ -109,7 +112,26 @@ namespace NexusForever.Game.Abstract.Entity
         /// Reset tradeskill talents
         /// </summary>
         public void ResetTradeskillTalents(TradeskillType type);
+        /// <summary>
+        /// Calculates and returns the cost of a talent reset for a tradeskill
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public uint GetTalentResetCost(TradeskillType type);
+        /// <summary>
+        /// If previously set, completes a craft.
+        /// </summary>
+        /// <returns>Whether the craft was completed and succesful</returns>
+        public bool CompleteCurrentCraft();
+        /// <summary>
+        /// Remembers a craft. Invoked by ClientCraftingCompleteComplexCraft and ClientCraftingCompleteSimpleCraft.
+        /// </summary>
+        /// <param name="info"></param>
+        public void SetCurrentCraft(ICurrentCraftInfo info);
+        /// <summary>
+        /// Abandons the currently remembered craft
+        /// </summary>
+        public void AbandonCurrentCraft();
        
 
     }

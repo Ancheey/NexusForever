@@ -267,5 +267,12 @@ namespace NexusForever.Game.Spell
             //        player.RemoveSpellProperty((Property)info.Entry.DataBits00, parameters.SpellInfo.Entry.Id);
             //    }));
         }
+        [SpellEffectHandler(SpellEffectType.CraftItem)]
+        public static void HandleEffectCraftItem(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            if (spell.Caster is not IPlayer player)
+                return;
+            player.SendSystemMessage("ello thee crafty matey");
+        }
     }
 }

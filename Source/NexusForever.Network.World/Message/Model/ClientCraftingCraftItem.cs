@@ -12,10 +12,11 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
+            
             ClientSpellcastUniqueId = reader.ReadUInt();
             CraftingStationUnitId = reader.ReadUInt();
             TradeskillSchematic2Id = reader.ReadUInt();
-            SchematicCount = reader.ReadUInt(18);
+            SchematicCount = reader.ReadUInt();
         }
     }
 }

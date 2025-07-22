@@ -61,6 +61,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                 case 43:
                     HandleTradeskillTrainer(session);
                     break;
+                case 44: // Crafting Station opening
                 case 45: // "InvokeShuttlePrompt"
                 case 46:
                 case 47:

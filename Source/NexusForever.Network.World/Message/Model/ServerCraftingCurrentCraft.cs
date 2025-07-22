@@ -1,3 +1,4 @@
+using NexusForever.Game.Static.Crafting;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 using System.Numerics;
@@ -9,7 +10,7 @@ namespace NexusForever.Network.World.Message.Model
     {
         public uint TradeskillSchematic2Id { get; set; }
         public CraftStats Stats { get; set; } = new CraftStats();
-        public uint CraftingGroupFlags { get; set; }
+        public CraftingCircuitSocketType[] CraftingGroupFlags { get; set; } = new CraftingCircuitSocketType[5];
         public uint SchematicCount { get; set; }
         public uint AdditiveCount { get; set; }
         public uint Unused { get; set; } = 0;
@@ -23,7 +24,18 @@ namespace NexusForever.Network.World.Message.Model
         {
             writer.Write(TradeskillSchematic2Id, 15);
             Stats.Write(writer);
-            writer.Write(CraftingGroupFlags);
+
+            //CraftingGroupFlags
+            uint craftingGroupFlag = 0;
+            for(int i = CraftingGroupFlags.Length - 1; i >= 0; i--)
+            {
+                craftingGroupFlag |= (uint)CraftingGroupFlags[i];
+                craftingGroupFlag <<= 3;
+            }
+            craftingGroupFlag <<= 5;
+            craftingGroupFlag |= (uint)CraftingGroupFlags.Length;
+
+            writer.Write(craftingGroupFlag);
             writer.Write(SchematicCount);
             writer.Write(AdditiveCount);
             writer.Write(Unused);

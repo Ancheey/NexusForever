@@ -1,5 +1,6 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Crafting;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Crafting;
 using NexusForever.GameTable;
@@ -11,6 +12,7 @@ namespace NexusForever.Game.Entity
 {
     public class TradeskillManager : ITradeskillManager
     {
+        private ICurrentCraftInfo currentCraftInfo;
         private Dictionary<TradeskillType, List<TradeskillTierEntry>> tradeskillTiers;
         private readonly int maxActiveTradeskills = 2;
         private readonly Dictionary<TradeskillType, ITradeskill> tradeskills;
@@ -147,7 +149,7 @@ namespace NexusForever.Game.Entity
             return tradeskillTiers[type].Count;
         }
 
-        public void GrantTradeskillXp(TradeskillType type, uint exp)
+        public uint GrantTradeskillXp(TradeskillType type, uint exp)
         {
             var expPostAddition = tradeskills[type].TradeskillXp + exp;
             var lastTier = GetTradeskillTier(type, (uint)(GetTradeskillTierCount(type) - 1));
@@ -157,6 +159,7 @@ namespace NexusForever.Game.Entity
             expPostAddition = Math.Min(expPostAddition, experienceCap); //Cap experience on the required exp for the last tier
 
             //set exp to the calculated amount
+            uint expGranted = expPostAddition - tradeskills[type].TradeskillXp;
             tradeskills[type].TradeskillXp = expPostAddition;
 
             //grant achievements for all tiers up to the current one
@@ -168,9 +171,10 @@ namespace NexusForever.Game.Entity
                 }
             }
             UpdatePlayerTradeskill(type);
+            return expGranted;
         }
 
-        public void GrantTradeskillCraftXp(ulong schematic2Id, bool craftSuccessful)
+        public uint GrantTradeskillCraftXp(ulong schematic2Id, bool craftSuccessful)
         {
             TradeskillSchematic2Entry schematic = GameTableManager.Instance.TradeskillSchematic2.GetEntry(schematic2Id);
             TradeskillType type = (TradeskillType)schematic.TradeSkillId;
@@ -179,12 +183,12 @@ namespace NexusForever.Game.Entity
             if (craftSuccessful)
             {
                 //TODO: Check first craft
-                GrantTradeskillXp(type, tradeskillTier.CraftXp);
+                return GrantTradeskillXp(type, tradeskillTier.CraftXp);
                 //TODO: grant first craft exp
             }
             else
             {
-                GrantTradeskillXp(type, tradeskillTier.FailXp);
+                return GrantTradeskillXp(type, tradeskillTier.FailXp);
             }
         }
 
@@ -251,6 +255,30 @@ namespace NexusForever.Game.Entity
                 .OrderBy(t => t.PointsToUnlock)
                 .ToList();
             return tradeskillTalentTiers[(int)tier].RespecCost;
+        }
+
+        public bool CompleteCurrentCraft()
+        {
+            //Calculate fail chance
+
+            //generate an item
+            return true;
+
+        }
+
+        public void SetCurrentCraft(ICurrentCraftInfo info)
+        {
+            currentCraftInfo = info;
+        }
+
+        public void AbandonCurrentCraft()
+        {
+            currentCraftInfo = null;
+            player.Session.EnqueueMessageEncrypted(new ServerCraftingCurrentCraft()
+            {
+                TradeskillSchematic2Id = 0,
+                SchematicCount = 0
+            });
         }
 
         public TradeskillManager(IPlayer player, CharacterModel model)
