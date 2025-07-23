@@ -32,22 +32,20 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
         public void Write(GamePacketWriter writer)
         {
-            ulong temp = 0;
 
-            for (int i = 0; i < 5; i++)
-            {
-                temp |= (ulong)StatType[i];
-                temp <<= 8;
-            }
-
-            temp |= (ulong)Unknown1;
+            ulong temp = ApSpSplit;
             temp <<= 8;
 
-            temp |= (ulong)ApSpSplit;
+            temp |= (ulong)(Unknown1);
             temp <<= 8;
 
             temp |= (ulong)Unknown2;
-            temp <<= 8;
+
+            for (int i = 4; i >=0; i--)
+            {
+                temp <<= 8;
+                temp |= (ulong)(StatType[i] > 0 ? StatType[i]+1 : 0);
+            }
 
             writer.Write(temp);
         }

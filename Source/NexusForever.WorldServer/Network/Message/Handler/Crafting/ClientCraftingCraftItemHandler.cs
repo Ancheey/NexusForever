@@ -21,16 +21,22 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Crafting
             var message = new ServerCraftingCurrentCraft()
             {
                 TradeskillSchematic2Id = packet.TradeskillSchematic2Id,
-                Stats = new NexusForever.Network.World.Message.Model.Shared.CraftStats() { StatType = [Property.RatingIntensity, Property.RatingIntensity, Property.RatingIntensity, 0, 0], Unknown1 = 10, Unknown2 = 10, ApSpSplit = 1 },
-                CraftingGroupFlags = [CraftingCircuitSocketType.Air,CraftingCircuitSocketType.Earth,0,0,0],
+                Stats = new NexusForever.Network.World.Message.Model.Shared.CraftStats() 
+                { 
+                    StatType = [Property.RatingIntensity,Property.RatingVigor,0,0,0], //saving this is broken
+                    Unknown1 = 0, //breaks stats 
+                    Unknown2 = 0, //breaks stats
+                    ApSpSplit = 1 //has to stay at 0
+                },
+                CraftingGroupFlags = [CraftingCircuitSocketType.Logic,CraftingCircuitSocketType.Logic,0,0,0],
                 SchematicCount = 1,
                 Item2Id = schematic.Item2IdOutput,
-                Unused = 10,
+                Unused = 1,
                 UnknownArray = [0, 0, 0, 0, 0],
                 DiscoveryCoordinates = new Vector2(0, 0),
                 DiscoveryVectorMultiplier = new Vector2(1, 1),
                 DiscoveryRadiusMultiplier = 1.0f,
-                AdditiveCount = 10,
+                AdditiveCount = 2, //same as sockets
             };
             session.EnqueueMessageEncrypted(message);
         }
