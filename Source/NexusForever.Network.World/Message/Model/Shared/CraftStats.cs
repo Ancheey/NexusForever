@@ -5,6 +5,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
 {
     public class CraftStats : IReadable, IWritable
     {
+        //Reading and writing properties in this packet, as used by crafting, requires offsetting the value by 1, as it reads and requires a value higher (for some reason)
         public Property[] StatType { get; set; } = new Property[5];
         public byte Unknown1 { get; set; }
         public byte ApSpSplit { get; set; } // Attack Power and Support Power split
@@ -17,6 +18,9 @@ namespace NexusForever.Network.World.Message.Model.Shared
             for (int i = 0; i < StatType.Length; i++)
             {
                 StatType[i] = (Property)((temp - 1) & 0xFF); //for some reason it has to be temp - 1. Otherwise the stat is offset 1 too far.
+                if (StatType[i] == (Property)255)
+                    StatType[i] = 0; //clean up any index overflows
+
                 temp >>= 8;
             }
 

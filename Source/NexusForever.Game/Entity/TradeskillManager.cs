@@ -18,7 +18,7 @@ namespace NexusForever.Game.Entity
         private readonly Dictionary<TradeskillType, ITradeskill> tradeskills;
         private readonly List<TradeskillType> activeTradeskills;
         private DateTime relearnCooldownFinishTimestamp;
-        private IPlayer player;
+        private readonly IPlayer player;
         private List<uint> learnedSchematics;
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace NexusForever.Game.Entity
         {
             var message = new ServerProfessionsLoad()
             {
-                RelearnCooldown = 0
+                RelearnCooldown = 0,
             };
             foreach (var tradeskill in tradeskills)
             {
@@ -259,6 +259,8 @@ namespace NexusForever.Game.Entity
 
         public bool CompleteCurrentCraft()
         {
+            //all based on the currentCraft property
+
             //Calculate fail chance
 
             //generate an item
@@ -279,6 +281,12 @@ namespace NexusForever.Game.Entity
                 TradeskillSchematic2Id = 0,
                 SchematicCount = 0
             });
+        }
+
+        public void BeginCraft(uint schematicId)
+        {
+            var schematic = GameTableManager.Instance.TradeskillSchematic2.GetEntry(schematicId);
+
         }
 
         public TradeskillManager(IPlayer player, CharacterModel model)

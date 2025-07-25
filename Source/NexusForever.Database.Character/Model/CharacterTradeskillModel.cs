@@ -12,6 +12,8 @@ namespace NexusForever.Database.Character.Model
         public ushort TradeskillId { get; set; }
         public byte IsActive { get; set; }
         public uint Xp { get; set; }
+        public uint talentData { get; set; }
         public virtual CharacterModel Character { get; set; }
+        
     }
 }

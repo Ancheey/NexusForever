@@ -14,6 +14,6 @@ namespace NexusForever.Game.Static.Crafting
         Fire = 0b100,
         Logic = 0b101,
         Life = 0b110,
-        Any = 0b111
+        Fusion = 0b111
     }
 }

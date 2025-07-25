@@ -132,7 +132,12 @@ namespace NexusForever.Game.Abstract.Entity
         /// Abandons the currently remembered craft
         /// </summary>
         public void AbandonCurrentCraft();
-       
+        /// <summary>
+        /// Sends initial packet for the craft to begin.
+        /// Doesn't invoke the ui. Used as a response to ClientCraftingCraftItem packet.
+        /// </summary>
+        /// <param name="schematicId"></param>
+        public void BeginCraft(uint schematicId);
 
     }
 }

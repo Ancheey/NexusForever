@@ -12,7 +12,7 @@ namespace NexusForever.Network.World.Message.Model
         public CraftStats Stats { get; private set; } = new CraftStats();
         public uint PowerCoreItem2Id { get; private set; }
         public uint ApSpSplitDelta { get; private set; }
-        public int[] UnknownArray { get; private set; }
+        public int[] PropertyPowerDelta { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
@@ -24,10 +24,10 @@ namespace NexusForever.Network.World.Message.Model
             ApSpSplitDelta = reader.ReadUInt();
 
             uint count = reader.ReadUInt(3);
-            UnknownArray = new int[count];
+            PropertyPowerDelta = new int[count];
             for (int i = 0; i < count; i++)
             {
-                UnknownArray[i] = reader.ReadInt();
+                PropertyPowerDelta[i] = reader.ReadInt();
             }
         }
     }

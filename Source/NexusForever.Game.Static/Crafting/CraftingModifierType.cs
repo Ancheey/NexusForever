@@ -10,7 +10,8 @@
         UnbuffedFailCap             = 0x8,//additive
         ChargeIncrement_RightShift  = 0x9,//additive
         OutputCount                 = 0xA,//multiplier
-        //Ingredient return chance  = 0xB,
+        IngredientReturn            = 0xB,
+        SocketRemoval               = 0xC,//bool per type
         AdditiveCost                = 0xE,//multiplier
         AdditiveVector              = 0xF,//multiplier
         AdditiveRadius              = 0x10,//multiplier
