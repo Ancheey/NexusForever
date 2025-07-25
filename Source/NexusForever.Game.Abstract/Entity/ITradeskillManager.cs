@@ -113,11 +113,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         public void ResetTradeskillTalents(TradeskillType type);
         /// <summary>
-        /// Calculates and returns the cost of a talent reset for a tradeskill
+        /// Returns the highest talent tier for that tradeskill. Used for talent resets
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public uint GetTalentResetCost(TradeskillType type);
+        public TradeskillTalentTierEntry GetHighestTalentTier(TradeskillType type);
         /// <summary>
         /// If previously set, completes a craft.
         /// </summary>

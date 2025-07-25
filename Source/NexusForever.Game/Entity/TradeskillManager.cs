@@ -1,10 +1,13 @@
-﻿using NexusForever.Database.Character;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Crafting;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Crafting;
+using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.GameTable.Static;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 
@@ -234,29 +237,34 @@ namespace NexusForever.Game.Entity
 
         public void ResetTradeskillTalents(TradeskillType type)
         {
-            for (int i = 0; i < 10; i++)
-                tradeskills[type].TradeskillTalentTierIds[i] = 0;
-
+            var pricePoint = tradeskills[type].GetHighestTalentTier();
+            tradeskills[type].ResetTalents();
+            player.Session.EnqueueMessageEncrypted(getModifiersMessage(type));
             UpdatePlayerTradeskill(type);
         }
 
         public void GrantTradeskillTalent(TradeskillType type, uint bonusId, uint tier)
         {
-            tradeskills[type].TradeskillTalentTierIds[tier] = bonusId;
-
+            tradeskills[type].PickTalent(tier, bonusId);
+            player.Session.EnqueueMessageEncrypted(getModifiersMessage(type));
             UpdatePlayerTradeskill(type);
         }
-
-        public uint GetTalentResetCost(TradeskillType type)
+        private ServerProfessionModifiers getModifiersMessage(TradeskillType tradeskill = 0)
         {
-            var tier = tradeskills[type].GetHighestTalentTier();
-            var tradeskillTalentTiers = GameTableManager.Instance.TradeskillTalentTier.Entries
-                .Where(t => (TradeskillType)t.TradeSkillId == type)
-                .OrderBy(t => t.PointsToUnlock)
-                .ToList();
-            return tradeskillTalentTiers[(int)tier].RespecCost;
+            var message = new ServerProfessionModifiers();
+            foreach (var modifier in tradeskills[tradeskill].GetModifiers())
+            {
+                message.Modifiers.Add(new ServerProfessionModifiers.CraftingModifier
+                {
+                    Type = modifier.ModifierType,
+                    Item2TypeId = modifier.ObjectIdSecondary,
+                    Item2MaterialId = modifier.ObjectIdTertiary,
+                    FixedValue = modifier.ValueInt,
+                    Coefficient = modifier.ValueFloat
+                });
+            }
+            return message;
         }
-
         public bool CompleteCurrentCraft()
         {
             //all based on the currentCraft property
@@ -286,7 +294,91 @@ namespace NexusForever.Game.Entity
         public void BeginCraft(uint schematicId)
         {
             var schematic = GameTableManager.Instance.TradeskillSchematic2.GetEntry(schematicId);
+            switch (schematic.TradeSkillId)
+            {
+                case (uint)TradeskillType.Cooking:
+                    throw new NotImplementedException();
+                case (uint)TradeskillType.Architect:
+                    throw new NotImplementedException();
+                default:
+                    BeginCircuitBoardCrafting(schematic);
+                    break;
+            }
+        }
+        private void BeginCircuitBoardCrafting(TradeskillSchematic2Entry entry)
+        {
+            var type = (TradeskillType)entry.TradeSkillId;
+            var modifiers = tradeskills[type].GetModifiers();
+            var item = GameTableManager.Instance.Item.GetEntry(entry.Item2IdOutput);
+            var itemStats = GameTableManager.Instance.ItemStat.GetEntry(item.ItemStatId);
 
+            //Making a list of sockets that could be used
+            var viableSockets = Enum.GetValues<CraftingCircuitSocketType>().ToList();
+
+            //not sure how they appear. Removing for now.
+            viableSockets.Remove(CraftingCircuitSocketType.Fusion);
+
+            //Talent Modified socket type removal
+            foreach (var socketId in modifiers
+                .Where(m => m.ModifierType == CraftingModifierType.SocketRemoval)
+                .Select(m => m.ObjectIdSecondary))
+            {
+                viableSockets.Remove((CraftingCircuitSocketType)socketId);
+            }
+            //we select all possible properties fitting remaining sockets
+            var viableProperties = viableSockets
+                .SelectMany(k => CraftingCircuitPropertyMap.Properties[k])
+                .ToList();
+
+            //We randomly select properties for each stat slot that is 4 - Craftable
+            Random rand = new();
+            Property[] selectedProperties       = [0,0,0,0,0];
+            CraftingCircuitSocketType[] flags   = [0,0,0,0,0];
+            for(int i = 0; i < 5; i++)
+            {
+                if (itemStats.ItemStatTypeEnum[i] == ItemStatType.Craftable)
+                {
+                    //selecting a random index
+                    //setting a stat at index to that random stat
+                    //removing it from a list of available stats (no repetitions)
+                    //findign a socket that this property belongs to
+                    var rndIdx = rand.Next(viableProperties.Count);
+                    selectedProperties[i] = viableProperties[rndIdx];
+                    viableProperties.RemoveAt(rndIdx);
+
+                    //this might change when we add fusion sockets since we'll have 2 available sockets for any stat
+                    flags[i] = viableSockets.First(s => CraftingCircuitPropertyMap.Properties[s].Contains(selectedProperties[i]));
+                }
+            }
+
+            //TODO: take materials from the player
+
+            var message = new ServerCraftingCurrentCraft()
+            {
+                TradeskillSchematic2Id = entry.Id,
+                Stats = new CraftStats()
+                {
+                    StatType = selectedProperties,
+                    ApSpSplit = 1,
+                    Unknown1 = 30,
+                    Unknown2 = 0
+                },
+                CraftingGroupFlags = flags,
+                Item2Id = item.Id,
+                SchematicCount = 1
+            };
+            player.Session.EnqueueMessageEncrypted(message);
+            player.Session.EnqueueMessageEncrypted(getModifiersMessage(type));
+        }
+
+        public TradeskillTalentTierEntry GetHighestTalentTier(TradeskillType type)
+        {
+            var tier = tradeskills[type].GetHighestTalentTier();
+            var tradeskillTalentTiers = GameTableManager.Instance.TradeskillTalentTier.Entries
+                .Where(t => (TradeskillType)t.TradeSkillId == type)
+                .OrderBy(t => t.PointsToUnlock)
+                .ToList();
+            return tradeskillTalentTiers[(int)tier];
         }
 
         public TradeskillManager(IPlayer player, CharacterModel model)
@@ -327,6 +419,7 @@ namespace NexusForever.Game.Entity
             //Always true
             tradeskills[TradeskillType.Cooking].IsActive = true;
             tradeskills[TradeskillType.Cooking].TalentPoints = 20;
+            tradeskills[TradeskillType.Weaponsmith].TalentPoints = 30;
 
 
             //debug - no clue what's proficiency about

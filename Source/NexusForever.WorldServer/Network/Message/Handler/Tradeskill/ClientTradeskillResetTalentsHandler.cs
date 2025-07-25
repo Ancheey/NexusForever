@@ -1,4 +1,6 @@
-﻿using NexusForever.Network.Message;
+﻿using NexusForever.Game.Static.Crafting;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 using System;
 using System.Collections.Generic;
@@ -12,8 +14,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Tradeskill
     {
         public void HandleMessage(IWorldSession session, ClientTradeskillResetTalents packet)
         {
-            var cost = session.Player.TradeskillManager.GetTalentResetCost(packet.TradeskillId);
-            session.Player.CurrencyManager.CurrencySubtractAmount(Game.Static.Entity.CurrencyType.Credits, cost);
+            var talentTier = session.Player.TradeskillManager.GetHighestTalentTier(packet.TradeskillId);
+            //we apy with credits for cooking, vouchers for anything else.
+            var currency = packet.TradeskillId == TradeskillType.Cooking ? CurrencyType.Credits : CurrencyType.CraftingVoucher;
+
+            session.Player.CurrencyManager.CurrencySubtractAmount(currency, talentTier.RespecCost);
             session.Player.TradeskillManager.ResetTradeskillTalents(packet.TradeskillId);
         }
     }

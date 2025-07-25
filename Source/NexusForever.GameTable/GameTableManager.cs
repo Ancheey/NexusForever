@@ -627,8 +627,11 @@ namespace NexusForever.GameTable
         public GameTable<TradeskillAchievementLayoutEntry> TradeskillAchievementLayout { get; private set; }
         [GameData]
         public GameTable<TradeskillAchievementRewardEntry> TradeskillAchievementReward { get; private set; }
+        [GameData]
         public GameTable<TradeskillAdditiveEntry> TradeskillAdditive { get; private set; }
+        [GameData]
         public GameTable<TradeskillBonusEntry> TradeskillBonus { get; private set; }
+        [GameData]
         public GameTable<TradeskillCatalystEntry> TradeskillCatalyst { get; private set; }
         public GameTable<TradeskillCatalystOrderingEntry> TradeskillCatalystOrdering { get; private set; }
         public GameTable<TradeskillHarvestingInfoEntry> TradeskillHarvestingInfo { get; private set; }

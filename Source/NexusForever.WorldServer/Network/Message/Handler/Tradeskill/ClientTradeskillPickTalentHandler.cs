@@ -1,4 +1,5 @@
-﻿using NexusForever.Network.Message;
+﻿using NexusForever.Game.Static.Crafting;
+using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 using System;
 using System.Collections.Generic;
