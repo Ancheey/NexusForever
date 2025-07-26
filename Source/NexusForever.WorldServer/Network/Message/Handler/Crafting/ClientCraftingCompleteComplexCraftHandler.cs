@@ -17,6 +17,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Crafting
     {
         public void HandleMessage(IWorldSession session, ClientCraftingCompleteComplexCraft packet)
         {
+            Console.WriteLine($"Schematic {packet.TradeskillSchematic2Id}");
+            Console.WriteLine($"Stats   [{packet.Stats.StatType[0]},{packet.Stats.StatType[1]},{packet.Stats.StatType[2]},{packet.Stats.StatType[3]},{packet.Stats.StatType[4]}]");
+            Console.WriteLine($"AP/SP(D){packet.ApSpSplitDelta}");
+            Console.WriteLine($"AP/SP {packet.Stats.ApSpSplit}");
+            Console.WriteLine($"Core: {packet.PowerCoreItem2Id}");
+            Console.WriteLine($"PPowr(D) [{packet.PropertyPowerDelta[0]},{packet.PropertyPowerDelta[1]},{packet.PropertyPowerDelta[2]},{packet.PropertyPowerDelta[3]},{packet.PropertyPowerDelta[4]}]");
             //send a spell packet
             //store craft in the tradeskillmanager
             //make spell effect to finish craft

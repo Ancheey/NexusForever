@@ -239,30 +239,56 @@ namespace NexusForever.Game.Entity
         {
             var pricePoint = tradeskills[type].GetHighestTalentTier();
             tradeskills[type].ResetTalents();
-            player.Session.EnqueueMessageEncrypted(getModifiersMessage(type));
+            player.Session.EnqueueMessageEncrypted(getModifiersMessage());
             UpdatePlayerTradeskill(type);
         }
 
         public void GrantTradeskillTalent(TradeskillType type, uint bonusId, uint tier)
         {
             tradeskills[type].PickTalent(tier, bonusId);
-            player.Session.EnqueueMessageEncrypted(getModifiersMessage(type));
+            player.Session.EnqueueMessageEncrypted(getModifiersMessage());
             UpdatePlayerTradeskill(type);
         }
-        private ServerProfessionModifiers getModifiersMessage(TradeskillType tradeskill = 0)
+        private ServerProfessionModifiers getModifiersMessage()
         {
+            //this method could use caching as it might be a slog
             var message = new ServerProfessionModifiers();
-            foreach (var modifier in tradeskills[tradeskill].GetModifiers())
+
+            // Gather all modifiers
+            List<TradeskillModifierInfo> modifiers = tradeskills.Keys
+                .SelectMany(k => tradeskills[k].GetModifiers())
+                .OrderBy(m=>m.ModifierType)
+                .ToList();
+
+            // get unique types
+            List<CraftingModifierType> distinctModifiers = modifiers
+                .Select(m => m.ModifierType)
+                .Distinct()
+                .ToList();
+
+            // create a header for each modifier
+            foreach(var type in distinctModifiers)
             {
                 message.Modifiers.Add(new ServerProfessionModifiers.CraftingModifier
                 {
-                    Type = modifier.ModifierType,
-                    Item2TypeId = modifier.ObjectIdSecondary,
-                    Item2MaterialId = modifier.ObjectIdTertiary,
-                    FixedValue = modifier.ValueInt,
-                    Coefficient = modifier.ValueFloat
+                    Type = type,
+                    Coefficient = 0,
                 });
+                var typeMods = modifiers.Where(m => m.ModifierType == type);
+                foreach (var modifier in typeMods)
+                {
+                    message.Modifiers.Add(new ServerProfessionModifiers.CraftingModifier
+                    {
+                        Type = modifier.ModifierType,
+                        TradeskillType = modifier.TradeskillAffected,
+                        Item2TypeId = modifier.ObjectIdSecondary,
+                        Item2MaterialId = modifier.ObjectIdTertiary,
+                        Coefficient = modifier.ValueFloat,
+                        FixedValue = modifier.ValueInt
+                    });
+                }
             }
+            
             return message;
         }
         public bool CompleteCurrentCraft()
@@ -363,12 +389,13 @@ namespace NexusForever.Game.Entity
                     Unknown1 = 30,
                     Unknown2 = 0
                 },
+                Unused = 1,
                 CraftingGroupFlags = flags,
                 Item2Id = item.Id,
                 SchematicCount = 1
             };
             player.Session.EnqueueMessageEncrypted(message);
-            player.Session.EnqueueMessageEncrypted(getModifiersMessage(type));
+            player.Session.EnqueueMessageEncrypted(getModifiersMessage());
         }
 
         public TradeskillTalentTierEntry GetHighestTalentTier(TradeskillType type)

@@ -15,8 +15,8 @@ namespace NexusForever.Network.World.Message.Model.Shared
         public int ObjectIdSecondary { get; }
         public int ObjectIdTertiary { get; }
         public float ValueFloat { get; }
-        public uint ValueInt { get; }
-        public TradeskillModifierInfo(uint tradeskillTalent, CraftingModifierType modifierType, TradeskillType tradeskillAffected, int objectIdSecondary, int objectIdTertiary, float valueFloat, uint valueInt)
+        public int ValueInt { get; }
+        public TradeskillModifierInfo(uint tradeskillTalent, CraftingModifierType modifierType, TradeskillType tradeskillAffected, int objectIdSecondary, int objectIdTertiary, float valueFloat, int valueInt)
         {
             TradeskillTalent = tradeskillTalent;
             ModifierType = modifierType;

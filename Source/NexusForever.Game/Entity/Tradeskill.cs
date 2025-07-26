@@ -3,11 +3,6 @@ using NexusForever.Game.Static.Crafting;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NexusForever.Game.Entity
 {
@@ -67,7 +62,7 @@ namespace NexusForever.Game.Entity
                     (int)bonus.ObjectIdSecondary00,
                     (int)bonus.ObjectIdTertiary00,
                     bonus.Value00,
-                    bonus.ValueInt00));
+                    (int)bonus.ValueInt00));
 
             if (bonus.TradeskillBonusEnum01 == 0)
                 return;
@@ -80,7 +75,7 @@ namespace NexusForever.Game.Entity
                     (int)bonus.ObjectIdSecondary01,
                     (int)bonus.ObjectIdTertiary01,
                     bonus.Value01,
-                    bonus.ValueInt01));
+                    (int)bonus.ValueInt01));
 
             if (bonus.TradeskillBonusEnum02 == 0)
                 return;
@@ -93,7 +88,7 @@ namespace NexusForever.Game.Entity
                     (int)bonus.ObjectIdSecondary02,
                     (int)bonus.ObjectIdTertiary02,
                     bonus.Value02,
-                    bonus.ValueInt02));
+                    (int)bonus.ValueInt02));
         }
 
         public IReadOnlyCollection<TradeskillModifierInfo> GetModifiers()

@@ -13,11 +13,12 @@ namespace NexusForever.Network.World.Message.Model
             public int Item2TypeId { get; set; }
             public int Item2MaterialId { get; set; }
             public float Coefficient { get; set; } // Might be used additive or multiplier, depends on Type
-            public uint FixedValue { get; set; }
+            public int FixedValue { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
                 writer.Write(Type, 32u);
+                writer.Write(TradeskillType, 32u);
                 writer.Write(Item2TypeId);
                 writer.Write(Item2MaterialId);
                 writer.Write(Coefficient);
