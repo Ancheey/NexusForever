@@ -562,7 +562,7 @@ namespace NexusForever.Network.Message
         ClientCraftingCompleteSimpleCraft = 0x0850,
         ClientCraftingCraftItemWithCatalyst = 0x0851,
         ClientCraftingCraftItem         = 0x0852,
-        ServerCraftingDiscoveryHotCold  = 0x0853,
+        ServerCraftingSuccess           = 0x0853,
         ServerCraftingCurrentCraft      = 0x0854,
         ServerProfessionsLoad           = 0x0856,
         ClientTradeskillLearn           = 0x0857,

@@ -23,6 +23,7 @@ namespace NexusForever.Game.Entity
         private DateTime relearnCooldownFinishTimestamp;
         private readonly IPlayer player;
         private List<uint> learnedSchematics;
+        private readonly List<TradeskillModifierInfo> globalModifiers = [];
 
         /// <summary>
         /// Checks whether a tradeskill of certain type can be activated
@@ -293,20 +294,87 @@ namespace NexusForever.Game.Entity
         }
         public bool CompleteCurrentCraft()
         {
-            //all based on the currentCraft property
-
-            //Calculate fail chance
-
-            //generate an item
-            return true;
-
+            var isSuccessful = true;
+            switch (currentCraftInfo.TradeskillType)
+            {
+                case TradeskillType.Cooking:
+                    throw new NotImplementedException();
+                case TradeskillType.Architect:
+                    throw new NotImplementedException();
+                default:
+                    isSuccessful = completeCircuitCurrentCraft(currentCraftInfo);
+                    break;
+            }
+            return isSuccessful;
         }
+        private bool completeCircuitCurrentCraft(ICurrentCraftInfo currentCraft)
+        {
+            var rand = new Random();
+            var failChance = calculateFailChance(                           // Get the fail chance
+                [.. currentCraft.CraftingGroupFlags],
+                currentCraft.Stats.StatType,
+                currentCraft.StatItemPowerModifiers);
+            failChance *= 100;                                              // Move it from 0.x to 0-100
+            failChance = (float)Math.Floor((decimal)failChance);            // Floor the value like it's done in the client.
 
+            bool isSuccessful = rand.Next(0, 101) > failChance;             // Check if a random roll from a 0 to 100 is higher than failchance
+
+            //generate a reward
+            GrantTradeskillCraftXp(currentCraft.TradeskillSchematic2Id, isSuccessful);
+            //generate item
+
+            //check achievements and quests
+
+            return false;
+        }
+        private float calculateFailChance(CraftingCircuitSocketType[] groupFlags, Property[] properties, int[] powerDeltas)
+        {
+            //this is overall nearly 99% accurate. Only excaptions are with very low percentages
+
+            float baseFailChance = 0.2925f;                                 // Base fail chance for 1 socket
+            var socketCount = groupFlags.Count(cgf => cgf != 0);            // Socket count
+
+            baseFailChance /= socketCount > 0 ? socketCount : 1;            // Calculate the % per socket power modifier
+
+            //mismatched sockets
+            float MismatchPenalty = 0.78f;                              // base TOTAL penalty for mismatching 
+
+            float baseMismatchPenaltyReduction = GetModifierValue(CraftingModifierType.MismatchPenalty);
+            MismatchPenalty *= baseMismatchPenaltyReduction;            // Penalty reduction
+
+            float MismatchFailChance = 0.375f;
+            MismatchFailChance /= socketCount > 0 ? socketCount : 1;    // Calculate the % per socket power modifier
+            MismatchFailChance *= baseMismatchPenaltyReduction;         // Penalty reduction for sockets
+
+            float socketFailChanceSum = 0f;
+            for(int i = 0; i < 5; i++)                                      // Socket check
+            {
+                var socket  = groupFlags[i];
+                var circuit = properties[i];
+                var delta   = powerDeltas[i];
+                if (socket == 0 && circuit == 0)                            // No circuit data in that slot
+                    continue;
+
+                var isMatching = CraftingCircuitPropertyMap.Properties[socket].Contains(circuit);
+
+                if (isMatching)
+                {
+                    socketFailChanceSum += delta * baseFailChance;
+                }
+                else
+                {
+                    socketFailChanceSum += (MismatchPenalty / 2);           // We divide by 2 because the other half is below the fail chance
+                    socketFailChanceSum += delta * MismatchFailChance;
+                }
+            }
+            var failChanceReduction = GetModifierValue(CraftingModifierType.UnbuffedFailCap, currentCraftInfo.TradeskillType);
+            var totalFailChance = socketFailChanceSum *= failChanceReduction;
+            return totalFailChance;
+        }
         public void SetCurrentCraft(ICurrentCraftInfo info)
         {
             currentCraftInfo = info;
         }
-
         public void AbandonCurrentCraft()
         {
             currentCraftInfo = null;
@@ -406,6 +474,101 @@ namespace NexusForever.Game.Entity
                 .OrderBy(t => t.PointsToUnlock)
                 .ToList();
             return tradeskillTalentTiers[(int)tier];
+        }
+
+        public void AddGlobalModifier(TradeskillModifierInfo modifier)
+        {
+            globalModifiers.Add(modifier);
+        }
+
+        public void RemoveGlobalModifier(TradeskillModifierInfo modifier)
+        {
+            globalModifiers.Remove(modifier);
+        }
+
+        public void ClearGlobalModifiers()
+        {
+            globalModifiers.Clear();
+        }
+
+        public List<TradeskillModifierInfo> GetModifiers(TradeskillType tradeskill = 0, CraftingModifierType type = 0)
+        {
+            List<TradeskillModifierInfo> mods = globalModifiers
+                .Where(m=> tradeskill == 0 || m.TradeskillAffected == tradeskill)
+                .Where(m => type == 0 || m.ModifierType == type)
+                .ToList();
+
+            if(tradeskill != 0)
+            {
+                var tradeskillModifiers = tradeskills[tradeskill].GetModifiers()
+                    .Where(m => type == 0 || m.ModifierType == type);
+                mods.AddRange(tradeskillModifiers);
+            }
+            return mods;
+        }
+
+        public float GetModifierValue(CraftingModifierType type, TradeskillType tradeskill = 0)
+        {
+            var modifiers = GetModifiers(tradeskill,type);
+            float multiplier = 1f;
+            switch (type)
+            {
+                case CraftingModifierType.MismatchPenalty:
+                    return 1 - modifiers.Sum(m => m.ValueFloat) / 100;
+                case CraftingModifierType.UnbuffedFailCapBase:
+                    return 1 - modifiers.Sum(m => m.ValueFloat) / 100;
+                case CraftingModifierType.Charge:
+                    return 1 - modifiers.Sum(m => m.ValueFloat) / 100;
+                case CraftingModifierType.MaterialCost:
+                    return modifiers.Sum(m => m.ValueFloat);
+                case CraftingModifierType.Material2Id:
+                    return modifiers.Sum(m => m.ValueFloat);
+                case CraftingModifierType.UnbuffedFailCap:
+                    return 1 - modifiers.Sum(m => m.ValueFloat) / 100;
+                case CraftingModifierType.ChargeIncrement_RightShift:
+                    return 4 * (1 + modifiers.Sum(m => m.ValueFloat));
+                case CraftingModifierType.OutputCount:;
+                    foreach(var i in modifiers)
+                        multiplier *= i.ValueFloat;
+                    return multiplier;
+                case CraftingModifierType.IngredientReturn:
+                    return 1 + modifiers.Sum(m => m.ValueFloat) / 100;
+                case CraftingModifierType.SocketRemoval:
+                    return modifiers.Count; //special case where we need to check each modifier
+                case CraftingModifierType.AdditiveCost:
+                    foreach (var i in modifiers)
+                        multiplier *= i.ValueFloat;
+                    return multiplier;
+                case CraftingModifierType.AdditiveVector:
+                    foreach (var i in modifiers)
+                        multiplier *= i.ValueFloat;
+                    return multiplier;
+                case CraftingModifierType.AdditiveRadius:
+                    foreach (var i in modifiers)
+                        multiplier *= i.ValueFloat;
+                    return multiplier;
+                case CraftingModifierType.SchematicDiscoveryRadius1:
+                    foreach (var i in modifiers)
+                        multiplier *= i.ValueFloat;
+                    return multiplier;
+                case CraftingModifierType.SchematicDiscoveryRadius2:
+                    foreach (var i in modifiers)
+                        multiplier *= i.ValueFloat;
+                    return multiplier;
+                case CraftingModifierType.ApSpSplitMaxDelta_LeftShift:
+                    return 2 / (1 + modifiers.Sum(m => m.ValueFloat));
+                case CraftingModifierType.Cost:
+                    foreach (var i in modifiers)
+                        multiplier *= i.ValueFloat;
+                    return multiplier;
+                case CraftingModifierType.CraftIsCritical:
+                    return (modifiers.Count > 0? 1 : 0);
+                case CraftingModifierType.AdditiveLimit:
+                    return modifiers.Sum(m => m.ValueFloat);
+                case CraftingModifierType.AdditiveTier:
+                    return modifiers.Sum(m => m.ValueFloat);
+            }
+            return 0;
         }
 
         public TradeskillManager(IPlayer player, CharacterModel model)

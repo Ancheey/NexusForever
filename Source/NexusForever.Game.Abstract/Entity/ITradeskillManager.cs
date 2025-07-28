@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract.Crafting;
 using NexusForever.Game.Static.Crafting;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -138,6 +139,33 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <param name="schematicId"></param>
         public void BeginCraft(uint schematicId);
+        /// <summary>
+        /// Adds a global modifier, unrelated to talents.
+        /// </summary>
+        /// <param name="modifier"></param>
+        public void AddGlobalModifier(TradeskillModifierInfo modifier);
+        /// <summary>
+        /// Removes a global modifier
+        /// </summary>
+        /// <param name="modifier"></param>
+        public void RemoveGlobalModifier(TradeskillModifierInfo modifier);
+        /// <summary>
+        /// Clears all global modifiers. Talent modifiers remain untouched.
+        /// </summary>
+        public void ClearGlobalModifiers();
+        /// <summary>
+        /// returns all modifiers
+        /// </summary>
+        /// <param name="tradeskill">tradeskill of choice</param>
+        /// <param name="type">type of modifier</param>
+        /// <returns></returns>
+        public List<TradeskillModifierInfo> GetModifiers(TradeskillType tradeskill = 0, CraftingModifierType type = 0);
+        /// <summary>
+        /// Returns a calculated value of the specified modifier.
+        /// </summary>
+        /// <param name="tradeskill">Optionally dependant on the type of a tradeskill</param>
+        /// <returns></returns>
+        public float GetModifierValue(CraftingModifierType type, TradeskillType tradeskill = 0);
 
     }
 }

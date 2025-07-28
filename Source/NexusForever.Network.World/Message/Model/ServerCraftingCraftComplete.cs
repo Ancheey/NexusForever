@@ -3,7 +3,7 @@ using NexusForever.Game.Static.Crafting;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCraftingDiscoveryHotCold)]
+    [Message(GameMessageOpcode.ServerCraftingSuccess)]
     public class ServerCraftingCraftComplete : IWritable
     {
         public bool Pass { get; set; }
