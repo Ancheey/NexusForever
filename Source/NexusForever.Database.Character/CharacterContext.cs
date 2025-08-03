@@ -32,6 +32,8 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterStatModel> CharacterStat { get; set; }
         public DbSet<CharacterTitleModel> CharacterTitle { get; set; }
         public DbSet<CharacterTradeskillMaterialModel> CharacterTradeskillMaterial { get; set; }
+        public DbSet<CharacterTradeskillModel> CharacterTradeskill { get; set; }
+        public DbSet<CharacterKnownSchematicModel> CharacterKnownSchematics { get; set; }
         public DbSet<CharacterZonemapHexgroupModel> CharacterZonemapHexgroup { get; set; }
         public DbSet<ChatChannelModel> ChatChannel { get; set; }
         public DbSet<ChatChannelMemberModel> ChatChannelMember { get; set; }
@@ -1533,6 +1535,77 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.TradeskillMaterials)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_tradeskill_material_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterTradeskillModel>(entity =>
+            {
+                entity.ToTable("character_tradeskills");
+
+                entity.HasKey(e => new { e.Id, e.TradeskillId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.TradeskillId)
+                    .HasColumnName("tradeskillId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.IsActive)
+                    .HasColumnName("isActive")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.TradeskillXp)
+                    .HasColumnName("tradeskillXp")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.TalentData)
+                    .HasColumnName("talentData")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ProficiencyFlags)
+                    .HasColumnName("proficiencyFlags")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.Tradeskill)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_tradeskill_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterKnownSchematicModel>(entity =>
+            {
+                entity.ToTable("character_known_schematics");
+
+                entity.HasKey(e => new { e.Id, e.SchematicId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.SchematicId)
+                    .HasColumnName("schematicId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Discovered)
+                    .HasColumnName("discovered")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.KnownSchematics)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_known_schematic_id__character_id");
             });
 
             modelBuilder.Entity<CharacterZonemapHexgroupModel>(entity =>

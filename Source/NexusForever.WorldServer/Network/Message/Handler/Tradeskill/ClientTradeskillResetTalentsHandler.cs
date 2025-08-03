@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Tradeskill
         public void HandleMessage(IWorldSession session, ClientTradeskillResetTalents packet)
         {
             var talentTier = session.Player.TradeskillManager.GetHighestTalentTier(packet.TradeskillId);
-            //we apy with credits for cooking, vouchers for anything else.
+            //we pay with credits for cooking, vouchers for anything else.
             var currency = packet.TradeskillId == TradeskillType.Cooking ? CurrencyType.Credits : CurrencyType.CraftingVoucher;
 
             session.Player.CurrencyManager.CurrencySubtractAmount(currency, talentTier.RespecCost);

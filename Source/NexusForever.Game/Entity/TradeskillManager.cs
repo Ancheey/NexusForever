@@ -35,7 +35,6 @@ namespace NexusForever.Game.Entity
 
             if (tradeskills[type].IsActive)
                 return false; //already active
-
             return true;
         }
         /// <summary>
